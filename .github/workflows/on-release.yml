@@ -1,0 +1,10 @@
+name: on-release
+on:
+  release:
+    types: [published]
+permissions: {}
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "published by ${{ github.actor }} (triggering_actor ${{ github.triggering_actor }}) tag ${{ github.event.release.tag_name }}"

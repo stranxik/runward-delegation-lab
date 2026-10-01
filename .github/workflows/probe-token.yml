@@ -1,0 +1,17 @@
+name: probe-token
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for path in "security-advisories" "security-advisories?state=draft"; do
+            code=$(curl -s -o /tmp/out -w '%{http_code}' -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${{ github.repository }}/$path")
+            echo "GET $path -> $code $(head -c 200 /tmp/out)"
+          done
+          code=$(curl -s -o /tmp/out -w '%{http_code}' -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${{ github.repository }}/security-advisories" -d '{"summary":"probe","description":"probe","severity":"low","vulnerabilities":[{"package":{"ecosystem":"npm","name":"runward-delegation-lab-probe"}}]}')
+          echo "POST security-advisories -> $code $(head -c 300 /tmp/out)"
